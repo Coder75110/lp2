@@ -5,26 +5,19 @@ class NQueensSolver:
         self.solutions = []
 
     def is_safe(self, row, col):
-        # Check this column
         for i in range(row):
             if self.board[i][col] == 1:
                 return False
-
-        # Check upper-left diagonal
-        for i, j in zip(range(row-1, -1, -1), range(col-1, -1, -1)):
+        for i, j in zip(range(row - 1, -1, -1), range(col - 1, -1, -1)):
             if self.board[i][j] == 1:
                 return False
-
-        # Check upper-right diagonal
-        for i, j in zip(range(row-1, -1, -1), range(col+1, self.N)):
+        for i, j in zip(range(row - 1, -1, -1), range(col + 1, self.N)):
             if self.board[i][j] == 1:
                 return False
-
         return True
 
     def solve(self, row=0):
         if row == self.N:
-            # Save the current board as a solution
             self.solutions.append([row[:] for row in self.board])
             return
 
@@ -42,15 +35,29 @@ class NQueensSolver:
         print(f"\nTotal solutions for N = {self.N}: {len(self.solutions)}\n")
         for idx, sol in enumerate(self.solutions, start=1):
             print(f"Solution #{idx}:")
-            for row in sol:
-                print(" ".join("Q" if col else "." for col in row))
+            self.print_board(sol)
             print()
+
+    def print_board(self, board):
+        for row in board:
+            print(" ".join("Q" if col else "." for col in row))
+
+    def find_best_solution(self):
+        # Convert each board to a tuple of queen column positions for sorting
+        def board_key(board):
+            return tuple(row.index(1) for row in board)
+
+        best = min(self.solutions, key=board_key)
+        print("Best solution (lexicographically smallest):")
+        self.print_board(best)
 
 def main():
     N = int(input("Enter the number of queens (N): "))
     solver = NQueensSolver(N)
     solver.solve()
     solver.print_solutions()
+    if solver.solutions:
+        solver.find_best_solution()
 
 if __name__ == "__main__":
     main()
