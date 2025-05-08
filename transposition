@@ -1,0 +1,52 @@
+import math
+
+class ColumnarTranspositionCipher:
+    def __init__(self, key):
+        self.key = key.upper()
+        self.cols = len(self.key)
+        self.order = sorted(range(self.cols), key=lambda k: self.key[k])
+        self.sorted_key = ''.join(sorted(self.key))
+
+    def _print_matrix(self, grid, label, header):
+        print(f"\n{label}\n   {'   '.join(header)}\n" + "-" * (4 * len(header)))
+        for row in grid: print(" | ".join(row))
+        print("-" * (4 * len(header)))
+
+    def encrypt(self, text):
+        text = text.replace(" ", "").upper().ljust(math.ceil(len(text)/self.cols) * self.cols, 'X')
+        grid = [list(text[i:i+self.cols]) for i in range(0, len(text), self.cols)]
+        self._print_matrix(grid, "Encryption Matrix:", list(self.key))
+        return ''.join(grid[r][c] for c in self.order for r in range(len(grid)))
+
+    def decrypt(self, cipher):
+        rows = math.ceil(len(cipher) / self.cols)
+        grid = [['' for _ in range(self.cols)] for _ in range(rows)]
+        sorted_idx = sorted(range(self.cols), key=lambda k: self.key[k])
+
+        print("\nDecryption Step 1: Key Order")
+        print("   " + "   ".join(self.sorted_key))
+        print("   " + "   ".join(str(i+1) for i in sorted_idx))
+
+        idx = 0
+        for pos, col in enumerate(sorted_idx):
+            for r in range(rows):
+                if idx < len(cipher): grid[r][pos] = cipher[idx]; idx += 1
+            self._print_matrix(grid, f"After Filling Column '{self.sorted_key[pos]}'", list(self.sorted_key))
+
+        rearranged = [['' for _ in range(self.cols)] for _ in range(rows)]
+        for i, k in enumerate(sorted_idx):
+            for r in range(rows):
+                rearranged[r][k] = grid[r][i]
+        self._print_matrix(rearranged, "Matrix in Original Key Order:", list(self.key))
+        return ''.join(''.join(row) for row in rearranged).rstrip('X')
+
+# Main
+if __name__ == "__main__":
+    plain = input("Enter the plain text: ")
+    key = input("Enter the key: ")
+    cipher = ColumnarTranspositionCipher(key)
+    encrypted = cipher.encrypt(plain)
+    decrypted = cipher.decrypt(encrypted)
+    print("\nPlain Text:", plain)
+    print("Encrypted Text:", encrypted)
+    print("Decrypted Text:", decrypted)
