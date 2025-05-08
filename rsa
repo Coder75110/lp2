@@ -1,0 +1,51 @@
+import sympy
+
+class RSA:
+    def __init__(self, p, q, e):
+        if not sympy.isprime(p) or not sympy.isprime(q):
+            raise ValueError("Both p and q must be prime numbers.")
+        
+        self.p = p
+        self.q = q
+        self.n = p * q
+        self.m = (p - 1) * (q - 1)
+        
+        if self.gcd(e, self.m) != 1:
+            raise ValueError("e must be coprime to (p-1)*(q-1). Choose another value.")
+        
+        self.e = e
+        self.d = self.find_d()
+    
+    def gcd(self, a, b):
+        while b:
+            a, b = b, a % b
+        return a
+    
+    def find_d(self):
+        return pow(self.e, -1, self.m)
+    
+    def encrypt(self, message):
+        return pow(message, self.e, self.n)
+    
+    def decrypt(self, ciphertext):
+        return pow(ciphertext, self.d, self.n)
+
+def main():
+    p = int(input("Enter a prime number (p): "))
+    q = int(input("Enter another prime number (q): "))
+    e = int(input("Enter the public exponent (e): "))
+    
+    rsa = RSA(p, q, e)
+    print("\nPublic Key (e, n):", (rsa.e, rsa.n))
+    print("Private Key (d, n):", (rsa.d, rsa.n))
+    print("Totient Function Q(n) = Q(p*q):", rsa.m)  # Displaying Q(n)
+        
+    message = int(input("Enter the message to be encrypted (as an integer): "))
+    ciphertext = rsa.encrypt(message)
+    print("Encrypted Message:", ciphertext)
+        
+    decrypted_message = rsa.decrypt(ciphertext)
+    print("Decrypted Message:", decrypted_message)
+
+if __name__ == "__main__":
+    main()
