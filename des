@@ -1,0 +1,42 @@
+from Crypto.Cipher import DES
+from Crypto.Random import get_random_bytes
+import base64
+
+def pad(text):
+    """Pad the input text to be a multiple of 8 bytes (DES block size)"""
+    while len(text) % 8 != 0:
+        text += ' '
+    return text
+
+def generate_key():
+    """Generate a 56-bit DES key (actually 64 bits with 8 parity bits)"""
+    return get_random_bytes(8)
+
+def encrypt(plain_text, key):
+    cipher = DES.new(key, DES.MODE_ECB)
+    padded_text = pad(plain_text)
+    encrypted_bytes = cipher.encrypt(padded_text.encode())
+    return base64.b64encode(encrypted_bytes).decode()
+
+def decrypt(cipher_text, key):
+    cipher = DES.new(key, DES.MODE_ECB)
+    decrypted_bytes = cipher.decrypt(base64.b64decode(cipher_text))
+    return decrypted_bytes.decode().rstrip()
+
+def bytes_to_hex(byte_data):
+    return ''.join(f'{b:02X}' for b in byte_data)
+
+def main():
+    message = input("Enter a message to encrypt: ")
+
+    key = generate_key()
+    print("\nDES Secret Key (Hex):", bytes_to_hex(key))
+
+    encrypted_message = encrypt(message, key)
+    print("Encrypted Message (Base64):", encrypted_message)
+
+    decrypted_message = decrypt(encrypted_message, key)
+    print("Decrypted Message:", decrypted_message)
+
+if __name__ == "__main__":
+    main()
