@@ -1,42 +1,56 @@
-def print_solution(board, N):
-    print("\nOne possible solution:")
-    for row in board:
-        print(" ".join("Q" if col else "." for col in row))
+class NQueensSolver:
+    def __init__(self, N):
+        self.N = N
+        self.board = [[0 for _ in range(N)] for _ in range(N)]
+        self.solutions = []
 
-def is_safe(board, row, col, N):
-    for i in range(row):
-        if board[i][col] == 1:
-            return False
-        
-    for i, j in zip(range(row-1, -1, -1), range(col-1, -1, -1)):
-        if board[i][j] == 1:
-            return False
+    def is_safe(self, row, col):
+        # Check this column
+        for i in range(row):
+            if self.board[i][col] == 1:
+                return False
 
-    for i, j in zip(range(row-1, -1, -1), range(col+1, N)):
-        if board[i][j] == 1:
-            return False
-    return True
+        # Check upper-left diagonal
+        for i, j in zip(range(row-1, -1, -1), range(col-1, -1, -1)):
+            if self.board[i][j] == 1:
+                return False
 
-def solve_n_queens(board, row, N):
-    if row == N:
+        # Check upper-right diagonal
+        for i, j in zip(range(row-1, -1, -1), range(col+1, self.N)):
+            if self.board[i][j] == 1:
+                return False
+
         return True
 
-    for col in range(N):
-        if is_safe(board, row, col, N):
-            board[row][col] = 1
-            if solve_n_queens(board, row + 1, N):
-                return True
-            board[row][col] = 0
-    return False
+    def solve(self, row=0):
+        if row == self.N:
+            # Save the current board as a solution
+            self.solutions.append([row[:] for row in self.board])
+            return
+
+        for col in range(self.N):
+            if self.is_safe(row, col):
+                self.board[row][col] = 1
+                self.solve(row + 1)
+                self.board[row][col] = 0
+
+    def print_solutions(self):
+        if not self.solutions:
+            print(f"No solutions exist for N = {self.N}")
+            return
+
+        print(f"\nTotal solutions for N = {self.N}: {len(self.solutions)}\n")
+        for idx, sol in enumerate(self.solutions, start=1):
+            print(f"Solution #{idx}:")
+            for row in sol:
+                print(" ".join("Q" if col else "." for col in row))
+            print()
 
 def main():
     N = int(input("Enter the number of queens (N): "))
-    board = [[0 for _ in range(N)] for _ in range(N)]
-
-    if solve_n_queens(board, 0, N):
-        print_solution(board, N)
-    else:
-        print("No solution exists for N =", N)
+    solver = NQueensSolver(N)
+    solver.solve()
+    solver.print_solutions()
 
 if __name__ == "__main__":
     main()
