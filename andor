@@ -1,0 +1,25 @@
+class StringProcessor:
+    def __init__(self, string):
+        self.string = string
+        
+    def process(self, operation):
+        result = " "
+        for char in self.string:
+            if operation == 'AND':
+                result += chr(ord(char) & 127)
+            elif operation == 'OR':
+                result += chr(ord(char) ^ 127)
+        return result
+    
+def main():
+    input_string = input("Enter a String:")
+    processor = StringProcessor(input_string)
+    
+    result_and =processor.process('AND')
+    print("Result (AND)", result_and)
+    
+    result_or = processor.process('OR')
+    print("Result (OR)" , result_or)
+    
+if __name__ == "__main__":
+    main()
