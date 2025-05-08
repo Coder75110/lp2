@@ -1,0 +1,58 @@
+import heapq
+
+class Graph:
+    def __init__(self):
+        self.edges = {}
+        self.heuristics = {}
+
+    def add_edge(self, node1, node2, cost):
+        if node1 not in self.edges:
+            self.edges[node1] = []
+        if node2 not in self.edges:
+            self.edges[node2] = []
+        self.edges[node1].append((node2, cost))
+        self.edges[node2].append((node1, cost))
+        
+    def set_heuristic(self, node, value):
+        self.heuristics[node] = value
+
+    def a_star(self, start, goal):
+        open_list = []
+        heapq.heappush(open_list, (self.heuristics.get(start, 0), 0, start, []))
+        closed_list = set()
+        while open_list:
+            _, cost, current, path = heapq.heappop(open_list)
+            if current in closed_list:
+                continue
+            path = path + [current]
+            closed_list.add(current)
+            if current == goal:
+                return path, cost
+            for neighbor, edge_cost in self.edges.get(current, []):
+                if neighbor not in closed_list:
+                    total_cost = cost + edge_cost
+                    estimated_cost = total_cost + self.heuristics.get(neighbor, float('inf'))
+                    heapq.heappush(open_list, (estimated_cost, total_cost, neighbor, path))
+        return None, float('inf')
+
+def main():
+    graph = Graph()
+    num_edges = int(input("Enter the number of edges: "))
+    for _ in range(num_edges):
+        node1, node2, cost = input("Enter edge (node1 node2 cost): ").split()
+        graph.add_edge(node1, node2, int(cost))
+
+    num_heuristics = int(input("Enter the number of heuristic values: "))
+    for _ in range(num_heuristics):
+        node, value = input("Enter heuristic (node value): ").split()
+        graph.set_heuristic(node, int(value))
+
+    start = input("Enter start node: ")
+    goal = input("Enter goal node: ")
+
+    path, cost = graph.a_star(start, goal)
+    print("Optimal Path:", path)
+    print("Total Cost:", cost)
+
+if __name__ == "__main__":
+    main()
