@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diffie-Hellman Key Exchange</title>
+    <link rel="stylesheet" href="diffie.css">
+    <script>
+        function modExp(base, exponent, mod) {
+            let result = 1;
+            base = base % mod;
+            while (exponent > 0) {
+                if (exponent % 2 === 1) {
+                    result = (result * base) % mod;
+                }
+                exponent = Math.floor(exponent / 2);
+                base = (base * base) % mod;
+            }
+            return result;
+        }
+
+        function generateAlicePublicKey() {
+            let p = parseInt(document.getElementById("prime").value);
+            let g = parseInt(document.getElementById("base").value);
+            let a = parseInt(document.getElementById("alicePrivate").value);
+
+            if (isNaN(p) || isNaN(g) || isNaN(a)) {
+                alert("Please enter valid values for Prime (p), Base (g), and Private Key (a)");
+                return;
+            }
+
+            let A = modExp(g, a, p);
+            document.getElementById("alicePublic").innerText = A;
+        }
+
+        function generateBobPublicKey() {
+            let p = parseInt(document.getElementById("prime").value);
+            let g = parseInt(document.getElementById("base").value);
+            let b = parseInt(document.getElementById("bobPrivate").value);
+
+            if (isNaN(p) || isNaN(g) || isNaN(b)) {
+                alert("Please enter valid values for Prime (p), Base (g), and Private Key (b)");
+                return;
+            }
+
+            let B = modExp(g, b, p);
+            document.getElementById("bobPublic").innerText = B;
+        }
+
+        function exchangePublicKeys() {
+            let A = document.getElementById("alicePublic").innerText;
+            let B = document.getElementById("bobPublic").innerText;
+
+            if (A === "-" || B === "-") {
+                alert("Both users need to generate their public keys first!");
+                return;
+            }
+
+            document.getElementById("aliceReceivedPublic").innerText = B;
+            document.getElementById("bobReceivedPublic").innerText = A;
+        }
+
+        function computeSharedKeys() {
+            let p = parseInt(document.getElementById("prime").value);
+            let a = parseInt(document.getElementById("alicePrivate").value);
+            let b = parseInt(document.getElementById("bobPrivate").value);
+
+            let A = parseInt(document.getElementById("alicePublic").innerText);
+            let B = parseInt(document.getElementById("bobPublic").innerText);
+
+            if (isNaN(A) || isNaN(B) || isNaN(p) || isNaN(a) || isNaN(b)) {
+                alert("Ensure all inputs are provided correctly!");
+                return;
+            }
+
+            let K_Alice = modExp(B, a, p);
+            let K_Bob = modExp(A, b, p);
+
+            document.getElementById("aliceKey").innerText = K_Alice;
+            document.getElementById("bobKey").innerText = K_Bob;
+
+            if (K_Alice === K_Bob) {
+                document.getElementById("result").innerText = `Key Exchange Successful! Shared Key: ${K_Alice}`;
+                document.getElementById("result").style.color = "green";
+            } else {
+                document.getElementById("result").innerText = "Key Exchange Failed!";
+                document.getElementById("result").style.color = "red";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Diffie-Hellman Key Exchange</h1>
+
+    <div class="public-params">
+        <label>Prime Number (p):</label>
+        <input type="number" id="prime" min="2">
+
+        <label>Base (g):</label>
+        <input type="number" id="base" min="2">
+    </div>
+
+    <div class="container">
+        <div class="user">
+            <h2>Alice (User 1)</h2>
+            <label>Private Key (a):</label>
+            <input type="number" id="alicePrivate" min="1" max="100">
+            <button onclick="generateAlicePublicKey()">Generate Public Key</button>
+            <p>Public Key (A): <span id="alicePublic">-</span></p>
+
+            <h3>Received Public Key from Bob:</h3>
+            <p><span id="aliceReceivedPublic">-</span></p>
+
+            <button onclick="exchangePublicKeys()">Exchange Public Keys</button>
+
+            <h3>Shared Secret Key:</h3>
+            <p><span id="aliceKey">-</span></p>
+        </div>
+
+        <div class="user">
+            <h2>Bob (User 2)</h2>
+            <label>Private Key (b):</label>
+            <input type="number" id="bobPrivate" min="1" max="100">
+            <button onclick="generateBobPublicKey()">Generate Public Key</button>
+            <p>Public Key (B): <span id="bobPublic">-</span></p>
+
+            <h3>Received Public Key from Alice:</h3>
+            <p><span id="bobReceivedPublic">-</span></p>
+
+            <button onclick="exchangePublicKeys()">Exchange Public Keys</button>
+
+            <h3>Shared Secret Key:</h3>
+            <p><span id="bobKey">-</span></p>
+        </div>
+    </div>
+
+    <button onclick="computeSharedKeys()">Compute Shared Secret Key</button>
+
+    <h2>Result</h2>
+    <p id="result"></p>
+</body>
+</html>
